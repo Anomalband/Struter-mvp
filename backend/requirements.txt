@@ -1,19 +1,18 @@
-# Web Sunucusu ve API
-fastapi==0.104.1
-uvicorn==0.24.0
-python-multipart==0.0.6
-
-# Video ve Görüntü İşleme (MoviePy için kritik versiyon)
-moviepy==1.0.3
-numpy==1.24.3
-Pillow==9.5.0
-
-# Yapay Zeka ve API Bağlantıları
-google-generativeai==0.3.1
-requests==2.31.0
-pydantic==2.5.2
-
-# Ses ve Diğer Araçlar
-gTTS==2.4.0
-python-dotenv==1.0.0
+fastapi
+uvicorn[standard]
+gunicorn
+python-multipart
+pydantic
+requests
+aiohttp
+google-generativeai
+Pillow
+numpy
+python-dotenv
+gTTS
+flask-cors
+moviepy
+imageio
+imageio-ffmpeg
+openai
 setuptools
