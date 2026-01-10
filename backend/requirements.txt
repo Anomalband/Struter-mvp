@@ -16,3 +16,4 @@ pydantic==2.5.2
 # Ses ve Diğer Araçlar
 gTTS==2.4.0
 python-dotenv==1.0.0
+setuptools
