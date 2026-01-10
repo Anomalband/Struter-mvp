@@ -14,10 +14,12 @@ from agents.montage import MontageAgent
 # 🔴 BU SATIR EN ÖNEMLİ
 app = FastAPI()
 
-# BU BLOK EN ÜSTTE OLMALI
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Tüm originlere izin vererek sorunu kökten eziyoruz
+    allow_origins=[
+        "https://struter-mvp.vercel.app",   # frontend
+        "http://localhost:3000",            # local frontend
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
