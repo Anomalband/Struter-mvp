@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 
 // BURASI KRİTİK: Localtunnel linkinin doğruluğundan emin ol. 
 // Sonunda "/" işareti olmasın.
-const API_BASE = 'https://struter-test.loca.lt'; 
+const API_BASE = 'https://struter-mvp.onrender.com'; 
 
 const VideoList = () => {
   const [videos, setVideos] = useState([]);
