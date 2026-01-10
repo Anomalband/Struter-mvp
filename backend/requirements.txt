@@ -3,4 +3,4 @@ uvicorn
 gunicorn
 python-dotenv
 flask-cors
-openai
+google-generativeai
