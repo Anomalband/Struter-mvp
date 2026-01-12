@@ -1,4 +1,4 @@
-from moviepy import VideoFileClip, AudioFileClip, concatenate_videoclips # .editor kısmı kaldırıldı
+from moviepy import VideoFileClip, AudioFileClip, concatenate_videoclips, vfx
 import os
 
 class MontageAgent:
@@ -16,48 +16,46 @@ class MontageAgent:
                     audio = AudioFileClip(a_path)
                     video = VideoFileClip(v_path)
                     
-                    # Video boyutu ayarlama (Resize yeni versiyonda da aynı çalışır)
-                    video = video.resized(height=target_h) # resize yerine bazen resized istenebilir
+                    # 1. Önce Boyutlandır ve Kırp (CPU yormamak için süreden önce yap)
+                    video = video.resized(height=target_h)
                     video = video.cropped(x_center=video.w/2, width=target_w, height=target_h)
                     
-                    dur = audio.duration
+                    audio_dur = audio.duration
                     
-                    # Video süresi ayarlama
-                    if video.duration < dur:
-                        # MoviePy 2.0+ için loop kullanımı bazen değişebilir, 
-                        # en garantisi subclip/set_duration mantığıdır.
-                        video = video.with_duration(dur) 
+                    # 🔴 KRİTİK DÜZELTME BURASI:
+                    if video.duration < audio_dur:
+                        # Video sesten kısaysa: Videoyu sesin süresine "loop" yap (döngüye sok)
+                        # Not: v2.0'da loop fonksiyonu vfx altındadır
+                        video = video.with_effects([vfx.Loop(n=None, duration=audio_dur)])
                     else:
-                        video = video.subclipped(0, dur) # subclip -> subclipped (v2.0 standardı)
+                        # Video sesten uzunsa: Sese göre kes
+                        video = video.subclipped(0, audio_dur)
                     
-                    video = video.with_audio(audio) # set_audio -> with_audio (v2.0 standardı)
+                    video = video.with_audio(audio)
                     clips.append(video)
 
             if clips:
-                # Klipleri birleştir
                 final = concatenate_videoclips(clips, method="compose")
                 
-                # Kesin süre kontrolü
                 if final.duration > total_target_duration:
                     final = final.subclipped(0, total_target_duration)
                 
-                # Klasör kontrolü (Render'da hata almamak için)
                 os.makedirs(os.path.join("storage", "outputs"), exist_ok=True)
                 out_path = os.path.join("storage", "outputs", output_name)
                 
-                # Yazma işlemi
+                # Render (Linux) için temp dosyası bazen sorun çıkarır, 
+                # o yüzden temp path'i mutlak yol yapabiliriz ya da varsayılanda bırakabiliriz.
                 final.write_videofile(
                     out_path, 
                     fps=24, 
                     codec="libx264", 
                     audio_codec="aac", 
-                    temp_audiofile="temp-audio.m4a", 
                     remove_temp=True,
-                    logger=None # Log kalabalığını önler
+                    logger=None 
                 )
                 
-                # Belleği temizle (Render'da RAM patlamaması için çok önemli)
                 for c in clips: c.close()
+                if 'audio' in locals(): audio.close() # Audio nesnelerini de kapat
                 final.close()
                 
                 return out_path
