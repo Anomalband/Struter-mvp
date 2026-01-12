@@ -28,6 +28,7 @@ app.add_middleware(
 # Diğer route'lar (app.get, app.post) bunun ALTINDA başlamalı
 # ROOT ENDPOINT
 @app.get("/")
+@app.head("/")
 def root():
     return {
         "status": "ok",
