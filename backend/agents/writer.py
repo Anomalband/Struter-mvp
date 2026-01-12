@@ -10,7 +10,7 @@ class WriterAgent:
         api_key = os.getenv("GEMINI_API_KEY")
         # Yeni SDK'da konfigürasyon Client üzerinden yapılır
         self.client = genai.Client(api_key=api_key)
-        self.model_id = 'gemini-2.0-flash' # 2.5 diye bir sürüm henüz yok, en günceli 2.0 flash
+        self.model_id = 'gemini-2.5-flash-lite' # 2.5 diye bir sürüm henüz yok, en günceli 2.0 flash
 
     def generate_script(self, user_prompt, duration_seconds):
         prompt = f"""
