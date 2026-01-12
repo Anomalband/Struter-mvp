@@ -5,7 +5,7 @@ python-multipart
 pydantic
 requests
 aiohttp
-google-generativeai
+google-genai
 Pillow
 numpy
 python-dotenv

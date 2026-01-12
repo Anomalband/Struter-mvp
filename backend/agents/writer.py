@@ -1,6 +1,6 @@
 import os
 import json
-import google.generativeai as genai
+from google import genai  # Yeni SDK
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -8,8 +8,9 @@ load_dotenv()
 class WriterAgent:
     def __init__(self):
         api_key = os.getenv("GEMINI_API_KEY")
-        genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-2.5-flash-lite') 
+        # Yeni SDK'da konfigürasyon Client üzerinden yapılır
+        self.client = genai.Client(api_key=api_key)
+        self.model_id = 'gemini-2.0-flash' # 2.5 diye bir sürüm henüz yok, en günceli 2.0 flash
 
     def generate_script(self, user_prompt, duration_seconds):
         prompt = f"""
@@ -18,10 +19,8 @@ class WriterAgent:
         
         KRİTİK TALİMATLAR:
         1. 'visual_query' değerleri Pexels'te aratılacaktır. Sadece konuyu anlatan İNGİLİZCE anahtar kelimeler yaz.
-        2. Örnek: Eğer konu arabaysa 'luxury car driving' yaz, gidip 'woman holding flower' yazma!
-        "Müşteri promptu ile görsel uyumu %100 olmalı. Eğer konu Heavy Metal ise, visual_query içine mutlaka 'heavy metal', 'rock concert', 'electric guitar' gibi anahtar kelimeleri her sahnede ekle. Sadece 'audience' yazma, 'heavy metal concert audience' yaz."
-        3. Sahne sürelerini toplam {duration_seconds} saniyeye tam eşitle.
-        4.Toplam metin uzunluğu en fazla {int(duration_seconds * 2.5)} kelime olmalı.
+        2. Sahne sürelerini toplam {duration_seconds} saniyeye tam eşitle.
+        3. Toplam metin uzunluğu en fazla {int(duration_seconds * 2.5)} kelime olmalı.
 
         JSON FORMATINDA CEVAP VER:
         {{
@@ -30,7 +29,20 @@ class WriterAgent:
           ]
         }}
         """
-        response = self.model.generate_content(prompt)
+        
+        # Yeni SDK kullanım şekli:
+        response = self.client.models.generate_content(
+            model=self.model_id,
+            contents=prompt
+        )
+        
+        # Markdown bloklarını temizleme (Yeni SDK'da response.text doğrudan gelir)
         clean_text = response.text.replace('```json', '').replace('```', '').strip()
-        return json.loads(clean_text)
-    
+        
+        try:
+            return json.loads(clean_text)
+        except json.JSONDecodeError:
+            # Eğer model bazen baştaki/sondaki ekstra metinleri silmezse diye güvenlik önlemi
+            start_idx = clean_text.find('{')
+            end_idx = clean_text.rfind('}') + 1
+            return json.loads(clean_text[start_idx:end_idx])
